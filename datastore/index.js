@@ -7,12 +7,27 @@ var items = {};
 
 // Public API - Fix these CRUD functions ///////////////////////////////////////
 
-exports.create = (text, callback) => {
-  var id = counter.getNextUniqueId(function(err, data) {
-    return data;
+const writeTodo = (text, id, callback) => {
+  fs.writeFile(path.join(exports.dataDir, id.toString() + '.txt'), text, (err) => {
+    if (err) {
+      throw ('error writing text');
+    } else {
+      callback(null, {id, text});
+    }
   });
-  items[id] = text;
-  callback(null, { id, text });
+};
+
+//read helper
+
+
+exports.create = (text, callback) => {
+  counter.getNextUniqueId(function(err, uniqueID) {
+    if(err) {
+      throw ('error at getNextUniqueId')
+    } else {
+      writeTodo(text, uniqueID, callback);
+    }
+  });
 };
 
 exports.readAll = (callback) => {

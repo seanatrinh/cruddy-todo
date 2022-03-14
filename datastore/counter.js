@@ -43,16 +43,8 @@ exports.getNextUniqueId = (callback) => {
   readCounter(function(err, data) {
     writeCounter(data + 1, () => {
       callback(null, zeroPaddedNumber(data + 1));
-      // console.log('you made it', data);
-      // returnVariable = data;
-      // console.log('you made it to returnVaraible:', returnVariable);
-      // return zeroPaddedNumber(returnVariable);
     });
   });
-  // console.log('did we make it here?', returnVariable);
-  // var thing = zeroPaddedNumber(returnVariable);
-  // console.log(thing);
-  // return zeroPaddedNumber(returnVariable);
 };
 
 
