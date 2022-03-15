@@ -36,11 +36,36 @@ const writeCounter = (count, callback) => {
   });
 };
 
+const returnData = (err, data) => {
+  if (err) {
+    console.log('err from returnData Callback:', err);
+    return;
+  }
+  console.log('non error from returnData Callback:', data);
+  // return a zero padded number here instead?
+  return data;
+};
+
 // Public API - Fix this function //////////////////////////////////////////////
 
-exports.getNextUniqueId = () => {
-  counter = counter + 1;
-  return zeroPaddedNumber(counter);
+exports.getNextUniqueId = (err, data) => {
+  var returnId;
+  readCounter(function(err, idNum) {
+    if (err) {
+      console.log('readCounter error in getNextUniqueId');
+    } else {
+      let incremented = idNum + 1;
+      writeCounter(incremented, function(err2, counterStr) {
+        if (err2) {
+          console.log('writeCounter error in getNextUniqueId');
+        } else {
+          returnId = counterStr;
+        }
+      });
+    }
+  });
+
+  return zeroPaddedNumber(returnId);
 };
 
 
