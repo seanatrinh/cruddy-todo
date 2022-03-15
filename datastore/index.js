@@ -10,6 +10,7 @@ var items = {};
 const writeTodo = (text, id, callback) => {
   fs.writeFile(path.join(exports.dataDir, id.toString() + '.txt'), text, (err) => {
     if (err) {
+      callback(err, {id, text});
       throw ('error writing text');
     } else {
       callback(null, {id, text});
@@ -30,6 +31,7 @@ exports.create = (text, callback) => {
 const readTodos = (callback) => {
   fs.readdir(exports.dataDir, (err, files) => {
     if (err) {
+      callback(err, slicedFiles);
       throw ('error reading dataDir');
     } else {
       let slicedFiles = files.map((file) => {
@@ -71,14 +73,31 @@ exports.readOne = (id, callback) => {
   });
 };
 
+const updateTodo = (id, text, callback) => {
+  // check if file exists
+  fs.readFile(path.join(exports.dataDir, id.toString() + '.txt'), 'utf8', (err, fileData) => {
+    if (err) {
+      callback(err, null);
+    } else {
+      fs.writeFile(path.join(exports.dataDir, id.toString() + '.txt'), text, (err) => {
+        if (err) {
+          callback(err, null);
+        } else {
+          callback(null, {id: id, text: text});
+        }
+      });
+    }
+  });
+};
+
 exports.update = (id, text, callback) => {
-  var item = items[id];
-  if (!item) {
-    callback(new Error(`No item with id: ${id}`));
-  } else {
-    items[id] = text;
-    callback(null, { id, text });
-  }
+  updateTodo(id, text, function(err, newText) {
+    if (err) {
+      callback(err, null);
+    } else {
+      callback(null, newText);
+    }
+  });
 };
 
 exports.delete = (id, callback) => {
