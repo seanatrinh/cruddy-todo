@@ -48,24 +48,13 @@ const returnData = (err, data) => {
 
 // Public API - Fix this function //////////////////////////////////////////////
 
-exports.getNextUniqueId = (err, data) => {
-  var returnId;
-  readCounter(function(err, idNum) {
-    if (err) {
-      console.log('readCounter error in getNextUniqueId');
-    } else {
-      let incremented = idNum + 1;
-      writeCounter(incremented, function(err2, counterStr) {
-        if (err2) {
-          console.log('writeCounter error in getNextUniqueId');
-        } else {
-          returnId = counterStr;
-        }
-      });
-    }
+exports.getNextUniqueId = (callback) => {
+  let returnVariable;
+  readCounter(function(err, data) {
+    writeCounter(data + 1, () => {
+      callback(null, zeroPaddedNumber(data + 1));
+    });
   });
-
-  return zeroPaddedNumber(returnId);
 };
 
 
