@@ -17,24 +17,38 @@ const writeTodo = (text, id, callback) => {
   });
 };
 
-//read helper
-
-
 exports.create = (text, callback) => {
   counter.getNextUniqueId(function(err, uniqueID) {
-    if(err) {
-      throw ('error at getNextUniqueId')
+    if (err) {
+      throw ('error at getNextUniqueId');
     } else {
       writeTodo(text, uniqueID, callback);
     }
   });
 };
 
-exports.readAll = (callback) => {
-  var data = _.map(items, (text, id) => {
-    return { id, text };
+const readTodos = (callback) => {
+  fs.readdir(exports.dataDir, (err, files) => {
+    if (err) {
+      throw ('error reading dataDir');
+    } else {
+      let slicedFiles = files.map((file) => {
+        // !!!!! We need to refactor this so that text is the actual text.
+        return {id: file.substr(0, file.length - 4), text: file.substr(0, file.length - 4)};
+      });
+      callback(null, slicedFiles);
+    }
   });
-  callback(null, data);
+};
+
+exports.readAll = (callback) => {
+  readTodos(function(err, files) {
+    if (err) {
+      throw ('error at readAll');
+    } else {
+      callback(null, files);
+    }
+  });
 };
 
 exports.readOne = (id, callback) => {
