@@ -3,6 +3,10 @@ const path = require('path');
 const _ = require('underscore');
 const counter = require('./counter');
 
+const Promise = require('bluebird');
+const readFilePromise = Promise.promisify(fs.readFile);
+
+
 var items = {};
 
 // Public API - Fix these CRUD functions ///////////////////////////////////////
@@ -36,19 +40,40 @@ const readTodos = (callback) => {
     } else {
       let slicedFiles = files.map((file) => {
         // !!!!! We need to refactor this so that text is the actual text.
-        return {id: file.substr(0, file.length - 4), text: file.substr(0, file.length - 4)};
+        let id = file.substr(0, file.length - 4);
+        return readFilePromise(file).then((fileData) => {
+          return {
+            id: id,
+            text: fileData
+          };
+        });
       });
-      callback(null, slicedFiles);
+      Promise.all(slicedFiles)
+        .then((items) => {
+          callback(null, items);
+        });
     }
   });
 };
 
 exports.readAll = (callback) => {
-  readTodos(function(err, files) {
+  fs.readdir(exports.dataDir, (err, files) => {
     if (err) {
-      throw ('error at readAll');
+      callback(err);
     } else {
-      callback(null, files);
+      let data = files.map((file) => {
+        let id = path.basename(file, '.txt');
+        return readFilePromise(path.join(exports.dataDir, file)).then((fileData) => {
+          return {
+            id: id,
+            text: fileData.toString()
+          };
+        });
+      });
+      Promise.all(data)
+        .then((items) => {
+          callback(null, items);
+        });
     }
   });
 };
